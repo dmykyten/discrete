@@ -27,7 +27,7 @@ class RSAKeyGen:
 
         # doesnt work properly
         # euclid here
-        #self.private = e**-1 % tmp
+        self.private = pow(e, -1, tmp)
 
         self.public = n, e
         print(n, e, self.private)
