@@ -16,8 +16,7 @@ class RSAKeyGen:
         self._generate_keys()
 
     def _generate_keys(self):
-        # p, q = self._randprime(), self._randprime()
-        p, q = 2503, 2803
+        p, q = self._randprime(), self._randprime()
         n = p * q  # public part 1
         tmp = (p - 1) * (q - 1)
 
@@ -38,18 +37,12 @@ class RSAKeyGen:
         assert self._RANGE > 2
 
         def generate_primes():
-            valid = True
             for num in range(100, self._RANGE):
-                prime_sqrt = round(sqrt(num))
-                for prime in self._primes:
+                for prime in range(2, num):
                     if num % prime == 0:
-                        valid = False
                         break
-                    if prime > prime_sqrt:
-                        break
-                if valid:
+                else:
                     self._primes.append(num)
-                valid = True
 
         if len(self._primes) == 0:
             generate_primes()
