@@ -2,6 +2,8 @@ from random import choice
 from itertools import count
 from math import sqrt
 from string import ascii_letters
+from hashlib import sha256, sha3_512
+from secrets import compare_digest
 
 
 class RSAKeyGen:
@@ -84,6 +86,7 @@ class RSAKeyGen:
         # if len(encrypted[-1]) < block_size * 2:
         #     encrypted[-1] += "9" * (block_size - len(encrypted[-1]))
         # encode message with public key
+        print(encrypted)
         encrypted = [
             pow(int(block), public_key[1], public_key[0]) for block in encrypted
         ]
@@ -112,4 +115,11 @@ class RSAKeyGen:
 
 
 srv = RSAKeyGen()
-print(srv.decrypt_msg(srv.private, srv.encrypt_msg(srv.public, "Hello, my name is ...")))
+data = "Hello, my name is ..."
+hashed_data = (sha3_512(data.encode("utf-8"))).digest()
+decrypted_message = srv.decrypt_msg(
+    srv.private, srv.encrypt_msg(srv.public, "Hello, my name is ...")
+)
+print(decrypted_message)
+hashed_data_decrypted = (sha3_512(decrypted_message.encode("utf-8"))).digest()
+print(compare_digest(hashed_data, hashed_data_decrypted))
