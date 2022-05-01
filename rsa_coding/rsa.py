@@ -84,7 +84,6 @@ class RSAKeyGen:
         # if len(encrypted[-1]) < block_size * 2:
         #     encrypted[-1] += "9" * (block_size - len(encrypted[-1]))
         # encode message with public key
-        print(encrypted)
         encrypted = [
             pow(int(block), public_key[1], public_key[0]) for block in encrypted
         ]
@@ -109,9 +108,8 @@ class RSAKeyGen:
             )
         # decode ascii codes to get message as string
         decrypted = "".join([chr(int(i)) for i in decrypted])
-        print(decrypted)
+        return decrypted
 
 
 srv = RSAKeyGen()
-print(srv.private, srv.public)
-srv.decrypt_msg(srv.private, srv.encrypt_msg(srv.public, "Hello, my name is ..."))
+print(srv.decrypt_msg(srv.private, srv.encrypt_msg(srv.public, "Hello, my name is ...")))
