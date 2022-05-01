@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 ## Usage example
 ![](usage_example.png)
 
