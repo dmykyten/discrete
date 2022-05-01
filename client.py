@@ -8,6 +8,7 @@ class Client:
         self.server_ip = server_ip
         self.port = port
         self.username = username
+        self.keys = RSAKeyGen()
 
     def init_connection(self):
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -18,37 +19,42 @@ class Client:
             return
 
         self.s.send(self.username.encode())
-
-        # exchange public keys
-        keys = RSAKeyGen()
-        self.s.send(str(keys.public[0]).encode())    # n from public
-        self.s.send(str(keys.public[1]).encode())     # e from public
-        server_keys = self.s.recv(1024).decode(), self.s.recv(1024).decode()
+        # exchanged public keys and converted server keys
+        server_keys = self.s.recv(1024).decode().split(',')
+        server_keys = [int(keypart) for keypart in server_keys]
         print(server_keys)
-
+        self.s.send(','.join([str(key) for key in self.keys.public]).encode())
         # receive the encrypted secret key
+        msg = [int(block) for block in self.s.recv(1024).decode().split(',')]
+        print(msg)
+        input()
+
         message_handler = threading.Thread(target=self.read_handler,args=())
         message_handler.start()
         input_handler = threading.Thread(target=self.write_handler,args=())
         input_handler.start()
 
-    def read_handler(self): 
+    def read_handler(self):
+        input()
         while True:
             message = self.s.recv(1024).decode()
 
             # decrypt message with the secrete key
 
-            # ... 
+            # ...
+
 
             print(message)
 
     def write_handler(self):
+        input()
         while True:
             message = input()
 
             # encrypt message with the secrete key
 
             # ...
+
             self.s.send(message.encode())
 
 if __name__ == "__main__":
