@@ -7,7 +7,7 @@ from secrets import compare_digest
 
 
 class RSAKeyGen:
-    _RANGE = 1000
+    _RANGE = 5000
     _primes = []
 
     def __init__(self):
@@ -37,7 +37,7 @@ class RSAKeyGen:
         assert self._RANGE > 2
 
         def generate_primes():
-            for num in range(100, self._RANGE):
+            for num in range(1000, self._RANGE):
                 for prime in range(2, num):
                     if num % prime == 0:
                         break
