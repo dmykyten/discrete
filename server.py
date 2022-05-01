@@ -1,9 +1,6 @@
 import socket
 import threading
-from rsa_coding import RSAKeyGen
-from msg_integrity import HasgMsg
-import string
-from itertools import count
+from rsa_coding import RSAKeyGen, rsa
 
 
 class Server:
@@ -16,6 +13,7 @@ class Server:
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         # generating keys
         self.keys = RSAKeyGen()
+        print(f"self keys is: {self.keys.public, self.keys.private}")
         self.clients_keys = dict()
 
     def start(self):
@@ -31,36 +29,37 @@ class Server:
 
             # send public key to the client
             c.send(','.join([str(key) for key in self.keys.public]).encode())
-            c_keys = [int(keypart) for keypart in c.recv(1024).decode().split(',')]
+            c_keys = tuple(int(keypart) for keypart in c.recv(1024).decode().split(','))
             self.clients_keys[c] = c_keys
-            print(c_keys)
+            print(f"client keys is: {c_keys}")
             # encrypt the secret with the clients public key
-            secret = 'cdeomeo'
-            encrypted = self.keys.encrypt_msg(c_keys, secret)
-            print(encrypted)
-            c.send(','.join([str(block) for block in encrypted]).encode())
-            input()
+            secret = self.keys.encrypt_msg(
+                c_keys, str(self.keys.private[1])
+            )
             # send the encrypted secret to a client
-
-            # ...
+            secret_hash = rsa.get_hash(str(secret))
+            secret = ','.join([str(value) for value in secret]).encode()
+            c.send(secret_hash)
+            c.send(secret)
 
             threading.Thread(target=self.handle_client, args=(c, addr,)).start()
 
     def broadcast(self, msg: str):
         for client in self.clients:
-            # encrypt the message
-
-            # ...
-
             client.send(msg.encode())
 
     def handle_client(self, c: socket, addr):
         while True:
-            msg = c.recv(1024)
-
-            for client in self.clients:
-                if client != c:
-                    client.send(msg)
+            msg_hash = c.recv(1024)
+            oldmsg = c.recv(1024).decode()
+            msg = [int(keypart) for keypart in oldmsg.split(',')]
+            msg = self.keys.decrypt_msg(self.keys.private, msg)
+            print(msg)
+            if rsa.verify_integrity(msg_hash, msg):
+                for client in self.clients:
+                    if client != c:
+                        client.send(msg_hash)
+                        client.send(oldmsg)
 
 
 if __name__ == "__main__":
